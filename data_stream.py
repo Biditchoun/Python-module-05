@@ -99,101 +99,30 @@ class LogProcessor(DataProcessor):
                              f"{element.get('log_message')}")
 
 
-def testnumeric():
-    print("Testing Numeric Processor...")
-    test = NumericProcessor()
-    val_test = test.validate(42)
-    if val_test == 0:
-        print(" Trying to validate input '42': False")
-    if val_test == 1:
-        print(" Trying to validate input '42': True")
-    val_test = test.validate("Hello")
-    if val_test == 0:
-        print(" Trying to validate input 'Hello': False")
-    if val_test == 1:
-        print(" Trying to validate input 'Hello': True")
-    print(" Test invalid ingestion of string 'foo' without prior validation:")
-    try:
-        test.ingest("foo")
-    except Exception as err:
-        print(f" Got exception: {err}")
-    else:
-        print(" Did not get any exception")
-    data = [1, 2, 3, 4, 5]
-    print(f" Processing data: {data}")
-    if not test.validate(data):
-        print(" Data was not validated")
-        return
-    test.ingest(data)
-    print(" Extracting 3 values...")
-    for i in range(0, 3):
-        output_test = test.output()
-        print(f" Numeric value {output_test[0]}: {output_test[1]}")
+class DataStream():
+	def __init__(self):
+		self.processors = []
 
+	def register_processor(self, proc: DataProcessor) -> None:
+		self.processors.append(proc)
+	
+	def process_stream(self, stream: list[typing.Any]) -> None:
+		for element in stream:
+			check = 0
+			for processor in self.processors:
+				try:
+					processor(element)
+				except Exception:
+					pass
+				else:
+					check = 1
+					break
+			if check == 0:
+				print(f"DataStream - Can't process element in stream: {element}")
 
-def testtext():
-    print("Testing Text Processor...")
-    test = TextProcessor()
-    val_test = test.validate(42)
-    if val_test == 0:
-        print(" Trying to validate input '42': False")
-    if val_test == 1:
-        print(" Trying to validate input '42': True")
-    val_test = test.validate("Hello")
-    if val_test == 0:
-        print(" Trying to validate input 'Hello': False")
-    if val_test == 1:
-        print(" Trying to validate input 'Hello': True")
-    print(" Test invalid ingestion of int '42' without prior validation:")
-    try:
-        test.ingest(42)
-    except Exception as err:
-        print(f" Got exception: {err}")
-    else:
-        print(" Did not get any exception")
-    data = ["Hello", "Nexus", "World"]
-    print(f" Processing data: {data}")
-    if not test.validate(data):
-        print(" Data was not validated")
-        return
-    test.ingest(data)
-    print(" Extracting 1 value...")
-    output_test = test.output()
-    print(f" Text value {output_test[0]}: {output_test[1]}")
-
-
-def testlog():
-    print("Testing Log Processor...")
-    test = LogProcessor()
-    val_test = test.validate("Hello")
-    if val_test == 0:
-        print(" Trying to validate input 'Hello': False")
-    if val_test == 1:
-        print(" Trying to validate input 'Hello': True")
-    print(" Test invalid ingestion of string 'foo' without prior validation:")
-    try:
-        test.ingest("foo")
-    except Exception as err:
-        print(f" Got exception: {err}")
-    else:
-        print(" Did not get any exception")
-    data = [{"log_level": "NOTICE", "log_message": "Connection to server"},
-            {"log_level": "ERROR", "log_message": "Unauthorized access!!"}]
-    print(f" Processing data: {data}")
-    if not test.validate(data):
-        print(" Data was not validated")
-        return
-    test.ingest(data)
-    print(" Extracting 2 values...")
-    for i in range(0, 2):
-        output_test = test.output()
-        print(f" Log entry {output_test[0]}: {output_test[1]}")
+	def print_processors_stats(self) -> None:
+		pass
 
 
 if __name__ == "__main__":
-    print("=== Code Nexus - Data Processor ===\n")
-    testnumeric()
-    print()
-    testtext()
-    print()
-    testlog()
+    print("=== Code Nexus - Data Stream ===\n")
